@@ -1,0 +1,35 @@
+README file for emr-hbase-sample
+
+This sample application reads genomic sequence files and creates an kmer index that is
+stored in an HBASE table.  Genomic sequence information is growing exponentially and 
+processing large fasta files is becoming problematic.  Hadoop and its related software
+provide a scalable infrastructure for processing such large files.  This application
+uses:
+   - custom PIG UDF's to read sequence fasta files and generate kmer indexes
+   - uses pig's builtin HBASE classes to store the index into hbase tables
+   - uses Elastic Map Reduce for creating hadoop cluster and for job submission
+
+
+Prerequisites
+
+There is a makefile that drives the process, but it assumes that your AWS id and 
+keys are defined in environment variables, that the aws-sdk is installed and that the
+elastic-mapreduce library is also installed and configured.  
+
+
+	- install aws-sdk
+	- install elastic-mapreduce
+	- makefile assumes s3cmd is also instaleld and configured
+
+To Run
+
+The makefile creates a new bucket in S3 and pushes all the required jars into that 
+bucket.  then spins up an EMR cluster with the hbase beta.  Once running, it adds
+a jobflow that generated the index.  
+
+take a look at the makefile and feel free to adjust the input data files if needed.
+
+	% make create   % creates the cluster
+	% make index	% runs a jobflow that creates the index in hbase
+	% make counts	% runs a jobflow that uses the index to caluclate kmer counts
+	% make destroy 	% terminates the cluster and removes the s3 bucket.
