@@ -1,5 +1,6 @@
 package com.amazon.karanb.emr;
 
+import gov.jgi.meta.hadoop.input.FastaBlockLineReader;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
@@ -7,8 +8,12 @@ import org.apache.hadoop.hbase.rest.client.Client;
 import org.apache.hadoop.hbase.rest.client.Cluster;
 import org.apache.hadoop.hbase.rest.client.RemoteHTable;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.Text;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -20,6 +25,21 @@ import java.io.IOException;
  */
 public class HBaseGenomics {
     public static void main(String[] args) {
+
+
+        try {
+            FileInputStream fstream = new FileInputStream("target/test-classes/1M.fas");
+            FastaBlockLineReader fblr = new FastaBlockLineReader(fstream);
+
+            Text key = new Text();
+            Map<String, String> setofreads = new HashMap<String, String>();
+            Map<String, String> setofreadsTotal = new HashMap<String, String>();
+
+            fblr.readLine(key, setofreads, Integer.MAX_VALUE, Integer.MAX_VALUE);
+            System.out.println("number of reads = " + setofreads.size());
+        } catch (Exception e) {
+            System.err.println(e);
+        }
 
         Configuration conf = HBaseConfiguration.create();
 

@@ -16,6 +16,11 @@
     </organization>
     <dependencies>
         <dependency>
+            <groupId>gov.jgi.gentech</groupId>
+            <artifactId>biopig-core</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
             <version>2.3.0</version>

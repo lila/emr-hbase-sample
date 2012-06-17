@@ -1,6 +1,6 @@
 
 --
--- generates kmer statistics from a fasta file
+-- generates kmer statistics from hbase table
 --
 --register s3://karanb.amazon.com/biopig/biopig-core-0.3.0-job.jar
 
@@ -9,11 +9,13 @@
 
 register $biopigjar
 
-A = load '$reads' using gov.jgi.meta.pig.storage.FastaStorage as (id: chararray, d: int, seq: bytearray);
-B = foreach A generate FLATTEN(gov.jgi.meta.pig.eval.KmerGenerator(seq, 21)) as (kmer:bytearray), id;
+A = LOAD 'hbase://kmer'
+       USING org.apache.pig.backend.hadoop.hbase.HBaseStorage(
+       'sequence:*', '-loadKey true')
+       AS (id:bytearray, sequence:map[]);
+B = foreach A generate id, SIZE(sequence);
+C = group B by $1 PARALLEL $p;
+D = foreach C generate group, COUNT(B);
 
---B = load 'kmer' using org.apache.pig.backend.hadoop.hbase.HBaseStorage('sequence:id sequence:value');
-STORE B INTO 'hbase://kmer'
-        USING org.apache.pig.backend.hadoop.hbase.HBaseStorage(
-              'sequence:id sequence:id');
-
+--store D into '$output';
+dump D;

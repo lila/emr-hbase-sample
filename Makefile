@@ -28,13 +28,12 @@ test:
 clean: cleanbootstrap
 	@echo "removed all unnecessary files"
 
-create: bootstrap 
+create: 
 	@ echo creating EMR cluster
 	${EMR} elastic-mapreduce --create --alive --name "$(USER)'s HBase genomics cluster" \
 	  --num-instances 2 \
 	  --instance-type cc1.4xlarge \
-	  --bootstrap-action s3://beta.elasticmapreduce/hbase-beta/install-hbase-stage-1 \
-	  --args s3://beta.elasticmapreduce/hbase-beta \
+	  --hbase \
 	  --bootstrap-action s3://us-east-1.elasticmapreduce/bootstrap-actions/configure-hadoop \
 	  --args -m,dfs.support.append=true | cut -d " " -f 4 > ./jobflowid
 
@@ -72,7 +71,7 @@ import_activity_logs: hbasetable2
 
 
 index: hbasetable
-	${EMR} -j `cat ./jobflowid` --jar s3://$(USER).hbase.genome/lib/pig-0.9.2-withouthadoop.jar --arg -p --arg reads=s3://$(USER).hbase.genome/data/1.fas --arg -p --arg biopigjar=s3://$(USER).hbase.genome/lib/biopig-core-0.3.0-job.jar --arg -p --arg output=s3://$(USER).hbase.genome/output --arg s3://${USER}.hbase.genome/pig/kmerStats.pig
+	${EMR} -j `cat ./jobflowid` --jar s3://$(USER).hbase.genome/lib/pig-0.9.2-withouthadoop.jar --arg -p --arg reads=s3://$(USER).hbase.genome/data/1.fas --arg -p --arg biopigjar=s3://$(USER).hbase.genome/lib/biopig-core-0.3.0-job.jar --arg -p --arg output=s3://$(USER).hbase.genome/output --arg s3://${USER}.hbase.genome/pig/kmerLoad.pig
 
 logs: 
 	${EMR} -j `cat ./jobflowid` --logs
