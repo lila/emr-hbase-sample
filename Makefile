@@ -17,8 +17,10 @@ KEY			= normal
 #
 
 help:
-	@echo "help for Makefile for AWS-CF-genome-alignment"
+	@echo "help for Makefile for hbase sample"
+	@echo "make bootstrap - push data and code to s3"
 	@echo "make create - launch the hbase cluster on aws"
+	@echo "make index - index sequence files and store into hbase"
 	@echo "make destroy - destroy the cluster"
 	@echo "make test - just some testing"
 
@@ -58,20 +60,11 @@ hbasetable:
 	${EMR} -j `cat ./jobflowid` --ssh " \"bin/hbase shell <  createtable \" "
 	touch hbasetable
 
-hbasetable2: 
-	${EMR} -j `cat ./jobflowid` --ssh "\"echo create \\'activity_logs\\', \\'info\\' > createtable\" "
-	${EMR} -j `cat ./jobflowid` --ssh " \"bin/hbase shell <  createtable \" "
-	touch hbasetable
-
-
-# index uses pig to index a sequence files and add the index values to hbase
-import_activity_logs: hbasetable2
-	${EMR} -j `cat ./jobflowid` --jar s3://$(USER).hbase.genome/lib/pig-0.9.2-withouthadoop.jar --arg -p --arg reads=s3://$(USER).hbase.genome/data/activity_log_1m.txt.out --arg -p --arg output=s3://$(USER).hbase.genome/output --arg s3://${USER}.hbase.genome/pig/importActivityLogs.pig
-
-
-
 index: hbasetable
 	${EMR} -j `cat ./jobflowid` --jar s3://$(USER).hbase.genome/lib/pig-0.9.2-withouthadoop.jar --arg -p --arg reads=s3://$(USER).hbase.genome/data/1.fas --arg -p --arg biopigjar=s3://$(USER).hbase.genome/lib/biopig-core-0.3.0-job.jar --arg -p --arg output=s3://$(USER).hbase.genome/output --arg s3://${USER}.hbase.genome/pig/kmerLoad.pig
+
+counts: hbasetable
+	${EMR} -j `cat ./jobflowid` --jar s3://$(USER).hbase.genome/lib/pig-0.9.2-withouthadoop.jar --arg -p --arg p=30 --arg -p --arg biopigjar=s3://$(USER).hbase.genome/lib/biopig-core-0.3.0-job.jar --arg -p --arg output=s3://$(USER).hbase.genome/output --arg s3://${USER}.hbase.genome/pig/kmerStats.pig
 
 logs: 
 	${EMR} -j `cat ./jobflowid` --logs

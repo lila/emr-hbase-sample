@@ -29,6 +29,7 @@ a jobflow that generated the index.
 
 take a look at the makefile and feel free to adjust the input data files if needed.
 
+	% make bootstrap% pushs code and data to new s3 bucket
 	% make create   % creates the cluster
 	% make index	% runs a jobflow that creates the index in hbase
 	% make counts	% runs a jobflow that uses the index to caluclate kmer counts

@@ -17,5 +17,4 @@ B = foreach A generate id, SIZE(sequence);
 C = group B by $1 PARALLEL $p;
 D = foreach C generate group, COUNT(B);
 
---store D into '$output';
-dump D;
+store D into '$output';
